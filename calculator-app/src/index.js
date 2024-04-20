@@ -1,14 +1,13 @@
-import React, { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./App.css";
-
+import React from "react"
+import ReactDOM from "react-dom"
 import App from "./App"
-const root = createRoot(document.getElementById("root"));
-root.render(
-  <StrictMode>
+
+ReactDOM.render(
+  <React.StrictMode>
     <App />
-  </StrictMode>
-);
+  </React.StrictMode>,
+  document.getElementById("root")
+)
 
 //npm install react-dom
 //npm install -g parcel
