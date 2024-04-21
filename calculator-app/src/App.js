@@ -1,4 +1,4 @@
-import { useReducer } from "react"
+import { useReducer } from "react" // a hook that is used to storing and updating states
 import DigitButton from "./DigitButton"
 import OperationButton from "./OperationButton"
 import "./App.css"
@@ -79,56 +79,86 @@ function reducer(state, { type, payload }) {
         currentOperand: state.currentOperand.slice(0, -1),
       }
     case ACTIONS.EVALUATE:
-      if (
-        state.operation == null ||
-        state.currentOperand == null ||
-        state.previousOperand == null
-      ) {
-        return state
+      const result = evaluate(state);
+      if (result === "Cannot divide by zero") {
+        return {
+          ...state,
+          overwrite: true,
+          previousOperand: null,
+          operation: null,
+          currentOperand: result,
+        };
+      }
+
+      if (result == null) {
+        return {
+          ...state,
+          currentOperand: "Error",
+          previousOperand: null,
+          operation: null,
+          overwrite: true,
+        };
       }
 
       return {
         ...state,
-        overwrite: true,
+        currentOperand: result.toString(),
         previousOperand: null,
         operation: null,
-        currentOperand: evaluate(state),
-      }
+        overwrite: true,
+      };
   }
 }
 
 function evaluate({ currentOperand, previousOperand, operation }) {
-  const prev = parseFloat(previousOperand)
-  const current = parseFloat(currentOperand)
-  if (isNaN(prev) || isNaN(current)) return ""
-  let computation = ""
-  switch (operation) {
-    case "+":
-      computation = prev + current
-      break
-    case "-":
-      computation = prev - current
-      break
-    case "*":
-      computation = prev * current
-      break
-    case "÷":
-      computation = prev / current
-      break
+  const prev = parseFloat(previousOperand);
+  const current = parseFloat(currentOperand);
+
+  if (operation === '÷' && current === 0) {
+    return "Cannot divide by zero";
   }
 
-  return computation.toString()
+  let computation = 0;
+  switch (operation) {
+    case '+':
+      computation = prev + current;
+      break;
+    case '-':
+      computation = prev - current;
+      break;
+    case '*':
+      computation = prev * current;
+      break;
+    case '÷':
+      if (current !== 0) {  // This check is necessary to ensure no division by zero
+        computation = prev / current;
+      }
+      break;
+    default:
+      return "";  // Handle undefined operation
+  }
+
+  return computation.toString();  // Convert number to string for consistency in return type
 }
+
 
 const INTEGER_FORMATTER = new Intl.NumberFormat("en-us", {
   maximumFractionDigits: 0,
 })
 function formatOperand(operand) {
-  if (operand == null) return
-  const [integer, decimal] = operand.split(".")
-  if (decimal == null) return INTEGER_FORMATTER.format(integer)
-  return `${INTEGER_FORMATTER.format(integer)}.${decimal}`
+  if (typeof operand === "string") {
+    // Directly return the string message if operand is a string
+    return operand;
+  }
+  if (operand == null) {
+    // Handle null and undefined inputs gracefully
+    return '';
+  }
+  // Assuming operand is a number; format it
+  const [integer, decimal] = operand.toString().split(".");
+  return `${INTEGER_FORMATTER.format(integer)}${decimal ? '.' + decimal : ''}`;
 }
+
 
 function App() {
   const [{ currentOperand, previousOperand, operation }, dispatch] = useReducer(
