@@ -1,4 +1,4 @@
-import { useReducer } from "react" // a hook that is used to storing and updating states
+import { useReducer } from "react" 
 import DigitButton from "./DigitButton"
 import OperationButton from "./OperationButton"
 import "./App.css"
